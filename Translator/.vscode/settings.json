@@ -1,0 +1,11 @@
+{
+    "cSpell.words": [
+        "googletrans",
+        "pady",
+        "ROBOTO"
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none"
+}
