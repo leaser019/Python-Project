@@ -1,0 +1,22 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none",
+    "cSpell.words": [
+        "blit",
+        "centerx",
+        "centery",
+        "colliderect",
+        "downflap",
+        "gameover",
+        "KEYDOWN",
+        "midbottom",
+        "midflap",
+        "midtop",
+        "pygame",
+        "rotozoom",
+        "upflap",
+        "USEREVENT"
+    ]
+}
