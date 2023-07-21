@@ -1,5 +1,5 @@
 ('D:\\Study Package\\Python-Project\\Flappy '
- 'Bird\\build\\FlappyBird\\PYZ-00.pyz',
+ 'Bird\\build\\flappyBird\\PYZ-00.pyz',
  [('__future__',
    'C:\\Users\\vomkh\\AppData\\Local\\Programs\\Python\\Python311\\Lib\\__future__.py',
    'PYMODULE'),

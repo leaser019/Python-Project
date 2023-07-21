@@ -1,3 +1,4 @@
+
 import pygame
 import sys
 import random
@@ -79,12 +80,12 @@ def check_score(pipes):
     return score_temp
 
 
-pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=512)
 
 
 pygame.init()
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=512)
 pygame.display.set_caption("Flappy Bird")
-pygame.display.set_icon(pygame.transform.scale2x(pygame.image.load("./assets/img/icon.png")))
+pygame.display.set_icon(pygame.transform.scale2x(pygame.image.load("./assets/img/icon.ico")))
 # Initial for game
 width_screen = 432
 height_screen = 768
@@ -130,7 +131,7 @@ bird_rect = bird.get_rect(center=(100, height_screen/2))
 
 # Init and Load Pipe
 pipe_img = pygame.transform.scale2x(
-    pygame.image.load("./assets/img/pipe-green.png").convert())
+    pygame.image.load("./assets/img/pipe-green.png").convert_alpha())
 list_pipe = []
 
 # Set Timer For PIPE
