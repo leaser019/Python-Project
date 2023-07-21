@@ -27,15 +27,14 @@ def display_score(game_state):
         score_rect = score_display.get_rect(center=(width_screen/2, 100))
         screen.blit(score_display, score_rect)
     if game_state == "game_over":
-        highest_score_font = pygame.font.Font("assets/font/04B_19.TTF", 40)
         score_display = highest_score_font.render(
             f"Score: {(int(score))}", True, (255, 255, 255))
-        score_rect = score_display.get_rect(center=(width_screen/2, 120))
+        score_rect = score_display.get_rect(center=(width_screen/2, 300))
         screen.blit(score_display, score_rect)
         highest_score_display = highest_score_font.render(
             f"Highest Score: {(int(highest_score))}", True, (255, 255, 255))
         highest_score_rect = highest_score_display.get_rect(
-            center=(width_screen/2, 500))
+            center=(width_screen/2, 100))
         screen.blit(highest_score_display, highest_score_rect)
 
 
@@ -57,8 +56,10 @@ def draw_pipe(pipes):
 def check_collision(pipes):
     for pipe in pipes:
         if bird_rect.colliderect(pipe):
+            hit_sound.play()
             return False
-        if bird_rect.top <= -20 or bird_rect.bottom >= height_screen:
+        if bird_rect.top <= -20 or bird_rect.bottom >= floor_backGround_y_pos + 40:
+            hit_sound.play()
             return False
     return True
 
@@ -73,10 +74,17 @@ def check_score(pipes):
     for pipe in pipes:
         if bird_rect.centerx == pipe.centerx:
             score_temp += 0.5
+        if score_temp > score:
+            add_point_sound.play()
     return score_temp
 
 
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=512)
+
+
 pygame.init()
+pygame.display.set_caption("Flappy Bird")
+pygame.display.set_icon(pygame.transform.scale2x(pygame.image.load("./assets/img/icon.png")))
 # Initial for game
 width_screen = 432
 height_screen = 768
@@ -85,32 +93,36 @@ bird_movement = 0
 game_active = False
 score = 0
 highest_score = 0
-count_time_play = 0
+time_make_pipe = 1600
+time_flag_swing = 90
+floor_backGround_x_pos = 0
+floor_backGround_y_pos = 600
+floor_backGround_x_pos_change = 2
+
 screen = pygame.display.set_mode((width_screen, height_screen))
 game_start_display = pygame.transform.scale2x(
-    pygame.image.load("assets/img/message.png")).convert_alpha()
+    pygame.image.load("./assets/img/message.png")).convert_alpha()
 game_over_display = pygame.transform.scale2x(
-    pygame.image.load("assets\img\gameover.png")).convert_alpha()
+    pygame.image.load("./assets\img\gameover.png")).convert_alpha()
 clock = pygame.time.Clock()
-game_font = pygame.font.Font("assets/font/04B_19.TTF", 60)
+game_font = pygame.font.Font("./assets/font/04B_19.TTF", 60)
+highest_score_font = pygame.font.Font("./assets/font/04B_19.TTF", 40)
 
 # Init and Load Background
 backGround = pygame.transform.scale2x(pygame.image.load(
-    "assets/img/background-night.png").convert())
+    "./assets/img/background-night.png").convert())
 
 # Init and Load Floor
 floor_backGround = pygame.transform.scale2x(
-    pygame.image.load("assets/img/floor.png").convert())
-floor_backGround_x_pos = 0
-floor_backGround_y_pos = 600
+    pygame.image.load("./assets/img/floor.png").convert())
 
 # Init and Load Bird
 bird_mid = pygame.transform.scale2x(pygame.image.load(
-    "assets/img/yellowbird-midflap.png").convert_alpha())
+    "./assets/img/yellowbird-midflap.png").convert_alpha())
 bird_upflap = pygame.transform.scale2x(pygame.image.load(
-    "assets/img/yellowbird-upflap.png").convert_alpha())
+    "./assets/img/yellowbird-upflap.png").convert_alpha())
 bird_downflap = pygame.transform.scale2x(pygame.image.load(
-    "assets/img/yellowbird-downflap.png").convert_alpha())
+    "./assets/img/yellowbird-downflap.png").convert_alpha())
 list_bird = [bird_downflap, bird_mid, bird_upflap]
 bird_index = 1
 bird = list_bird[bird_index]
@@ -118,18 +130,23 @@ bird_rect = bird.get_rect(center=(100, height_screen/2))
 
 # Init and Load Pipe
 pipe_img = pygame.transform.scale2x(
-    pygame.image.load("assets/img/pipe-green.png").convert())
+    pygame.image.load("./assets/img/pipe-green.png").convert())
 list_pipe = []
 
 # Set Timer For PIPE
-time_make_pipe = 1500
 spawn_pipe = pygame.USEREVENT
 pygame.time.set_timer(spawn_pipe, time_make_pipe)
 
 # Set Timer For BIRD
-time_flag = 90
 fly = pygame.USEREVENT + 1
-pygame.time.set_timer(fly, time_flag)
+pygame.time.set_timer(fly, time_flag_swing)
+
+# Add Sound
+flap_sound = pygame.mixer.Sound("./assets/sound/sfx_wing.wav")
+add_point_sound = pygame.mixer.Sound("./assets/sound/sfx_point.wav")
+hit_sound = pygame.mixer.Sound("./assets/sound/sfx_hit.wav")
+die_sound = pygame.mixer.Sound("./assets/sound/sfx_die.wav")
+theme_song = pygame.mixer.Sound("./assets/sound/Flappy Bird Theme Song.mp3")
 
 while True:
     # Event
@@ -142,6 +159,7 @@ while True:
             if event.key == pygame.K_SPACE and game_active:
                 bird_movement = 0
                 bird_movement -= gravity*50
+                flap_sound.play()
             if event.key == pygame.K_SPACE and game_active == False:
                 game_active = True
                 list_pipe.clear()
@@ -159,13 +177,11 @@ while True:
         if event.type == spawn_pipe:
             list_pipe.extend(create_pipe())
     # Check collision
-    game_active = check_collision(list_pipe)
-    if (game_active == False):
-        count_time_play += 1
 
     # Draw background
     screen.blit(backGround, (0, 0))
     if game_active:
+        game_active = check_collision(list_pipe)
         # Draw bird
         bird = list_bird[bird_index]
         rotated_bird = rotate_bird(bird)
@@ -180,14 +196,14 @@ while True:
         display_score("main_game")
         if highest_score < score:
             highest_score = score
+
     else:
         display_score("game_over")
-        if count_time_play == 0:
-            screen.blit(game_over_display, (25, 600))
-        screen.blit(game_start_display, (70, 20))
+        screen.blit(game_start_display, (60, 180))
+
     # Draw floor
     draw_floor()
-    floor_backGround_x_pos -= 3
+    floor_backGround_x_pos -= floor_backGround_x_pos_change
     if floor_backGround_x_pos <= - width_screen:
         floor_backGround_x_pos = 0
 
